@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>BibiBling</title>
+<title>BibiBling✦</title>
 <link id="gfont" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Jost:wght@300;400;500;600&family=DM+Sans:wght@300;400;500;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -659,8 +659,15 @@ function ProductCard({item,cfg,onItem,currency}){
         <h3 style={{fontFamily:"var(--font-heading,"+FONTS[hf]+")",fontSize:17,fontWeight:500,color:T.text,lineHeight:1.25,marginBottom:5}}>{item.name}</h3>
         {item.rating>0&&<div style={{display:"flex",alignItems:"center",gap:5,marginBottom:5}}><Stars rating={item.rating}/><span style={{fontSize:11,color:T.tl}}>({item.ratingCount||0})</span></div>}
         <div style={{display:"flex",alignItems:"center",gap:7}}>
-          <span style={{fontSize:15,fontWeight:700,color:T.text}}>{cur}{item.price.toFixed(2)}</span>
-          {item.originalPrice&&<span style={{fontSize:11,color:T.tl,textDecoration:"line-through"}}>{cur}{item.originalPrice.toFixed(2)}</span>}
+          {(()=>{
+            const sizePrices=(item.sizes||[]).map(s=>s.price).filter(p=>p>0);
+            const hasSizes=sizePrices.length>0;
+            const minPrice=hasSizes?Math.min(...sizePrices):item.price;
+            return <>
+              <span style={{fontSize:15,fontWeight:700,color:T.text}}>{hasSizes?"From ":""}{cur}{(minPrice||0).toFixed(2)}</span>
+              {item.originalPrice&&<span style={{fontSize:11,color:T.tl,textDecoration:"line-through"}}>{cur}{item.originalPrice.toFixed(2)}</span>}
+            </>;
+          })()}
         </div>
       </div>
     </div>
@@ -738,13 +745,13 @@ function ItemPage({item,items,cfg,onBack,onAdd,onItem,currency}){
   const hf=cfg.fontHeading||"Cormorant Garamond";
   const cur=currency||"RM";
 
-  // Calculate price with variation upcharges
+  // Size = absolute price (main). Color & Style = addons on top of size price.
   const varPrice=(()=>{
-    let total=item.price||0;
-    if(selColor&&item.colors){const c=item.colors.find(c=>c.label===selColor);if(c)total+=c.price||0;}
-    if(selSize&&item.sizes){const s=item.sizes.find(s=>s.label===selSize);if(s)total+=s.price||0;}
-    if(selStyle&&item.styles){const s=item.styles.find(s=>s.label===selStyle);if(s)total+=s.price||0;}
-    return total;
+    let base=item.price||0;
+    if(selSize&&item.sizes){const s=item.sizes.find(s=>s.label===selSize);if(s&&s.price>0)base=s.price;}
+    if(selColor&&item.colors){const c=item.colors.find(c=>c.label===selColor);if(c&&c.price>0)base+=c.price;}
+    if(selStyle&&item.styles){const s=item.styles.find(s=>s.label===selStyle);if(s&&s.price>0)base+=s.price;}
+    return base;
   })();
 
   const handleAdd=()=>{
@@ -796,11 +803,17 @@ function ItemPage({item,items,cfg,onBack,onAdd,onItem,currency}){
               </div>
             )}
             <div style={{display:"flex",alignItems:"baseline",gap:10,flexWrap:"wrap"}}>
-              <span style={{fontSize:28,fontWeight:700,color:T.text}}>{cur}{varPrice.toFixed(2)}</span>
-              {item.originalPrice&&<>
-                <span style={{fontSize:14,color:T.tl,textDecoration:"line-through"}}>{cur}{item.originalPrice.toFixed(2)}</span>
-                <span style={{background:"#E54040",color:"#fff",fontSize:11,fontWeight:700,borderRadius:50,padding:"2px 10px"}}>{pct}% off</span>
-              </>}
+              {(()=>{
+                const hasSizeOpts=item.sizes&&item.sizes.length>0;
+                const showFrom=hasSizeOpts&&!selSize;
+                return <>
+                  <span style={{fontSize:28,fontWeight:700,color:T.text}}>{showFrom?"From ":""}{cur}{varPrice.toFixed(2)}</span>
+                  {item.originalPrice&&<>
+                    <span style={{fontSize:14,color:T.tl,textDecoration:"line-through"}}>{cur}{item.originalPrice.toFixed(2)}</span>
+                    <span style={{background:"#E54040",color:"#fff",fontSize:11,fontWeight:700,borderRadius:50,padding:"2px 10px"}}>{pct}% off</span>
+                  </>}
+                </>;
+              })()}
             </div>
           </div>
 
@@ -818,7 +831,7 @@ function ItemPage({item,items,cfg,onBack,onAdd,onItem,currency}){
                   <button key={co.label} onClick={()=>setSelColor(co.label)} className="btn"
                     style={{padding:"7px 16px",borderRadius:50,border:"1.5px solid "+(selColor===co.label?T.p:T.b),background:selColor===co.label?T.p+"15":"none",color:selColor===co.label?T.p:T.tm,fontSize:13,fontWeight:600,transition:"all .15s"}}>
                     {co.hex&&<span style={{display:"inline-block",width:12,height:12,borderRadius:"50%",background:co.hex,marginRight:6,border:"1px solid rgba(0,0,0,.15)",verticalAlign:"middle"}}/>}
-                    {co.label}{co.price>0&&" +"+cur+co.price.toFixed(2)}
+                    {co.label}{co.price>0&&<span style={{fontSize:11,opacity:.75,marginLeft:4}}>+{cur}{parseFloat(co.price).toFixed(2)}</span>}
                   </button>
                 ))}
               </div>
@@ -836,7 +849,7 @@ function ItemPage({item,items,cfg,onBack,onAdd,onItem,currency}){
                 {item.sizes.map(sz=>(
                   <button key={sz.label} onClick={()=>setSelSize(sz.label)} className="btn"
                     style={{padding:"7px 18px",borderRadius:50,border:"1.5px solid "+(selSize===sz.label?T.p:T.b),background:selSize===sz.label?T.p:"none",color:selSize===sz.label?"#fff":T.tm,fontSize:13,fontWeight:600,transition:"all .15s"}}>
-                    {sz.label}{sz.price>0&&" +"+cur+sz.price.toFixed(2)}
+                    {sz.label}{sz.price>0&&<span style={{fontSize:11,opacity:.75,marginLeft:4}}>{cur}{parseFloat(sz.price).toFixed(2)}</span>}
                   </button>
                 ))}
               </div>
@@ -851,7 +864,7 @@ function ItemPage({item,items,cfg,onBack,onAdd,onItem,currency}){
                 {item.styles.map(st=>(
                   <button key={st.label} onClick={()=>setSelStyle(st.label)} className="btn"
                     style={{padding:"7px 16px",borderRadius:50,border:"1.5px solid "+(selStyle===st.label?T.p:T.b),background:selStyle===st.label?T.p+"15":"none",color:selStyle===st.label?T.p:T.tm,fontSize:13,fontWeight:600,transition:"all .15s"}}>
-                    {st.label}{st.price>0&&" +"+cur+st.price.toFixed(2)}
+                    {st.label}{st.price>0&&<span style={{fontSize:11,opacity:.75,marginLeft:4}}>+{cur}{parseFloat(st.price).toFixed(2)}</span>}
                   </button>
                 ))}
               </div>
@@ -1586,11 +1599,11 @@ function ItemFormAdmin({item,cfg,onSave,onClose}){
                   {f.sizes.map((sz,i)=>(
                     <div key={i} style={{display:"flex",gap:6,marginBottom:6,alignItems:"center"}}>
                       <input value={sz.label} onChange={e=>updSize(i,"label",e.target.value)} placeholder="Label e.g. S" style={{...iSt(),flex:1}}/>
-                      <input type="number" step=".01" value={sz.price} onChange={e=>updSize(i,"price",e.target.value)} placeholder="+RM" style={{...iSt(),width:70}}/>
+                      <input type="number" step=".01" value={sz.price} onChange={e=>updSize(i,"price",e.target.value)} placeholder="RM price" style={{...iSt(),width:80}}/>
                       {f.sizes.length>1&&<button onClick={()=>remSize(i)} className="btn" style={{background:"#FFE0E0",borderRadius:8,padding:"0 9px",color:"#E54040",fontSize:15,height:38,flexShrink:0}}>×</button>}
                     </div>
                   ))}
-                  <button onClick={addSize} className="btn" style={{width:"100%",background:T.card,border:"1px dashed "+T.b,borderRadius:8,padding:"6px",fontSize:12,color:T.tm}}>+ Add Size</button>
+                  <p style={{fontSize:11,color:T.tl,marginBottom:6}}>💡 Enter the full price for each size (e.g. RM 59.00). This is the main price — "From" is based on the lowest size price.</p><button onClick={addSize} className="btn" style={{width:"100%",background:T.card,border:"1px dashed "+T.b,borderRadius:8,padding:"6px",fontSize:12,color:T.tm}}>+ Add Size</button>
                 </div>
               )}
             </div>
@@ -1607,11 +1620,11 @@ function ItemFormAdmin({item,cfg,onSave,onClose}){
                     <div key={i} style={{display:"flex",gap:6,marginBottom:6,alignItems:"center"}}>
                       <input type="color" value={co.hex||"#000000"} onChange={e=>updColor(i,"hex",e.target.value)} style={{width:38,height:38,borderRadius:8,border:"1.5px solid "+T.b,padding:2,cursor:"pointer",flexShrink:0}}/>
                       <input value={co.label} onChange={e=>updColor(i,"label",e.target.value)} placeholder="Color name" style={{...iSt(),flex:1}}/>
-                      <input type="number" step=".01" value={co.price} onChange={e=>updColor(i,"price",e.target.value)} placeholder="+RM" style={{...iSt(),width:70}}/>
+                      <input type="number" step=".01" value={co.price} onChange={e=>updColor(i,"price",e.target.value)} placeholder="+RM addon" style={{...iSt(),width:90}}/>
                       {f.colors.length>1&&<button onClick={()=>remColor(i)} className="btn" style={{background:"#FFE0E0",borderRadius:8,padding:"0 9px",color:"#E54040",fontSize:15,height:38,flexShrink:0}}>×</button>}
                     </div>
                   ))}
-                  <button onClick={addColor} className="btn" style={{width:"100%",background:T.card,border:"1px dashed "+T.b,borderRadius:8,padding:"6px",fontSize:12,color:T.tm}}>+ Add Color</button>
+                  <p style={{fontSize:11,color:T.tl,marginBottom:6}}>💡 Enter the extra amount to add on top of the size price (e.g. 10 = +RM10.00). Leave 0 if no extra charge.</p><button onClick={addColor} className="btn" style={{width:"100%",background:T.card,border:"1px dashed "+T.b,borderRadius:8,padding:"6px",fontSize:12,color:T.tm}}>+ Add Color</button>
                 </div>
               )}
             </div>
@@ -1627,11 +1640,11 @@ function ItemFormAdmin({item,cfg,onSave,onClose}){
                   {f.styles.map((st,i)=>(
                     <div key={i} style={{display:"flex",gap:6,marginBottom:6}}>
                       <input value={st.label} onChange={e=>updStyle(i,"label",e.target.value)} placeholder="Style name" style={{...iSt(),flex:1}}/>
-                      <input type="number" step=".01" value={st.price} onChange={e=>updStyle(i,"price",e.target.value)} placeholder="+RM" style={{...iSt(),width:70}}/>
+                      <input type="number" step=".01" value={st.price} onChange={e=>updStyle(i,"price",e.target.value)} placeholder="+RM addon" style={{...iSt(),width:90}}/>
                       {f.styles.length>1&&<button onClick={()=>remStyle(i)} className="btn" style={{background:"#FFE0E0",borderRadius:8,padding:"0 9px",color:"#E54040",fontSize:15,height:38,flexShrink:0}}>×</button>}
                     </div>
                   ))}
-                  <button onClick={addStyle} className="btn" style={{width:"100%",background:T.card,border:"1px dashed "+T.b,borderRadius:8,padding:"6px",fontSize:12,color:T.tm}}>+ Add Style</button>
+                  <p style={{fontSize:11,color:T.tl,marginBottom:6}}>💡 Enter the extra amount to add on top of the size price (e.g. 10 = +RM10.00). Leave 0 if no extra charge.</p><button onClick={addStyle} className="btn" style={{width:"100%",background:T.card,border:"1px dashed "+T.b,borderRadius:8,padding:"6px",fontSize:12,color:T.tm}}>+ Add Style</button>
                 </div>
               )}
             </div>
