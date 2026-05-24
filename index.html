@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Mystery Jewelry Jar</title>
+<title>BibiBling</title>
 <link id="gfont" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Jost:wght@300;400;500;600&family=DM+Sans:wght@300;400;500;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -179,6 +179,7 @@ function App(){
   const[popupDone,setPopupDone]=useState(false);const[showPopup,setShowPopup]=useState(false);
   const[adminOk,setAdminOk]=useState(false);const[currency,setCurrency]=useState("RM");
   const[searchQ,setSearchQ]=useState("");const[searchOpen,setSearchOpen]=useState(false);
+  const[loginOpen,setLoginOpen]=useState(false);const[signupOpen,setSignupOpen]=useState(false);
   const logoTaps=useRef(0);const logoTimer=useRef(null);
 
   useEffect(()=>{(async()=>{
@@ -267,12 +268,14 @@ function App(){
           <button onClick={()=>{handleLogoTap();nav("home");}} className="btn" style={{position:"absolute",left:"50%",transform:"translateX(-50%)",background:"none",padding:0}}>
             <span style={{fontFamily:"var(--font-heading,"+FONTS[hf]+")",fontSize:20,fontWeight:500,color:T.text,letterSpacing:".04em",whiteSpace:"nowrap"}}>{cfg.shopName}</span>
           </button>
-          <div style={{display:"flex",alignItems:"center",gap:10,zIndex:1}}>
-            <button onClick={()=>setSearchOpen(s=>!s)} className="btn" style={{background:"none",fontSize:18,color:T.text,width:34,height:34,display:"flex",alignItems:"center",justifyContent:"center"}}>🔍</button>
-            <button onClick={()=>nav("cart")} className="btn" style={{background:"none",fontSize:18,color:T.text,width:34,height:34,display:"flex",alignItems:"center",justifyContent:"center",position:"relative"}}>
+          <div style={{display:"flex",alignItems:"center",gap:6,zIndex:1}}>
+            <button onClick={()=>setSearchOpen(s=>!s)} className="btn" style={{background:"none",fontSize:17,color:T.text,width:32,height:32,display:"flex",alignItems:"center",justifyContent:"center"}}>🔍</button>
+            <button onClick={()=>nav("cart")} className="btn" style={{background:"none",fontSize:17,color:T.text,width:32,height:32,display:"flex",alignItems:"center",justifyContent:"center",position:"relative"}}>
               🛒
-              {cnt>0&&<span style={{position:"absolute",top:-4,right:-4,background:T.p,color:"#fff",borderRadius:"50%",width:17,height:17,fontSize:9,fontWeight:700,display:"flex",alignItems:"center",justifyContent:"center"}}>{cnt}</span>}
+              {cnt>0&&<span style={{position:"absolute",top:-4,right:-4,background:T.p,color:"#fff",borderRadius:"50%",width:16,height:16,fontSize:9,fontWeight:700,display:"flex",alignItems:"center",justifyContent:"center"}}>{cnt}</span>}
             </button>
+            <button onClick={()=>setLoginOpen(true)} className="btn hide-sm" style={{background:"none",border:"1.5px solid "+T.b,borderRadius:50,padding:"5px 13px",fontSize:12,color:T.text}}>Login</button>
+            <button onClick={()=>setSignupOpen(true)} className="btn hide-sm" style={{background:T.p,borderRadius:50,padding:"5px 13px",fontSize:12,color:"#fff",fontWeight:600}}>Sign Up</button>
           </div>
         </div>
         {searchOpen&&(
@@ -298,8 +301,12 @@ function App(){
                 </button>
               ))}
             </div>
-            <div style={{padding:"16px 20px",borderTop:"1px solid "+T.b}}>
-              <button onClick={()=>nav("catalog")} className="btn" style={{width:"100%",padding:"12px",background:T.p,color:"#fff",borderRadius:11,fontSize:14,fontWeight:600,fontFamily:"var(--font-body,'Jost'),sans-serif"}}>Shop Now ✦</button>
+            <div style={{padding:"16px 20px",borderTop:"1px solid "+T.b,display:"flex",flexDirection:"column",gap:8}}>
+              <button onClick={()=>nav("catalog")} className="btn" style={{width:"100%",padding:"12px",background:T.p,color:"#fff",borderRadius:11,fontSize:14,fontWeight:600}}>Shop Now ✦</button>
+              <div style={{display:"flex",gap:8}}>
+                <button onClick={()=>{setMenuOpen(false);setSignupOpen(true);}} className="btn" style={{flex:1,padding:"10px",background:T.p+"18",border:"1.5px solid "+T.p,borderRadius:11,color:T.p,fontSize:13,fontWeight:600}}>Sign Up</button>
+                <button onClick={()=>{setMenuOpen(false);setLoginOpen(true);}} className="btn" style={{flex:1,padding:"10px",background:"none",border:"1.5px solid "+T.b,borderRadius:11,color:T.text,fontSize:13}}>Login</button>
+              </div>
             </div>
           </div>
         </>
@@ -355,12 +362,48 @@ function App(){
       {showPopup&&cfg.popupVisible&&(
         <>
           <div className="fi" onClick={()=>{setShowPopup(false);setPopupDone(true);}} style={{position:"fixed",inset:0,background:"rgba(0,0,0,.5)",zIndex:500}}/>
-          <div className="mi" style={{position:"fixed",top:"50%",left:"50%",transform:"translate(-50%,-50%)",background:T.card,borderRadius:24,padding:"36px 28px",zIndex:501,width:"min(420px,92vw)",textAlign:"center",boxShadow:"0 24px 60px rgba(0,0,0,.22)"}}>
-            <button onClick={()=>{setShowPopup(false);setPopupDone(true);}} className="btn" style={{position:"absolute",top:14,right:14,background:"none",fontSize:20,color:T.tm}}>×</button>
-            <div className="fl" style={{fontSize:36,marginBottom:12,color:T.p}}>✦</div>
-            <h2 style={{fontFamily:"var(--font-heading,"+FONTS[hf]+")",fontSize:26,color:T.text,marginBottom:8,fontWeight:400}}>{cfg.popupTitle}</h2>
-            <p style={{fontSize:14,color:T.tm,marginBottom:20,lineHeight:1.7}}>{cfg.popupText}</p>
-            <PopupEmailForm cfg={cfg} subs={subs} saveSubs={saveSubs} toast={toast} onDone={()=>{setShowPopup(false);setPopupDone(true);}}/>
+          <div style={{position:"fixed",top:0,left:0,right:0,bottom:0,display:"flex",alignItems:"center",justifyContent:"center",zIndex:501,pointerEvents:"none"}}>
+            <div className="mi" style={{background:T.card,borderRadius:24,padding:"36px 28px",width:"min(400px,90vw)",maxWidth:400,textAlign:"center",boxShadow:"0 24px 60px rgba(0,0,0,.22)",position:"relative",pointerEvents:"auto"}}>
+              <button onClick={()=>{setShowPopup(false);setPopupDone(true);}} className="btn" style={{position:"absolute",top:14,right:14,background:"rgba(0,0,0,.07)",borderRadius:"50%",width:28,height:28,fontSize:16,color:T.tm,display:"flex",alignItems:"center",justifyContent:"center"}}>×</button>
+              <div className="fl" style={{fontSize:36,marginBottom:12,color:T.p}}>✦</div>
+              <h2 style={{fontFamily:"var(--font-heading,"+FONTS[hf]+")",fontSize:26,color:T.text,marginBottom:8,fontWeight:400}}>{cfg.popupTitle}</h2>
+              <p style={{fontSize:14,color:T.tm,marginBottom:20,lineHeight:1.7}}>{cfg.popupText}</p>
+              <SignupForm cfg={cfg} subs={subs} saveSubs={saveSubs} toast={toast} onDone={()=>{setShowPopup(false);setPopupDone(true);}} onLogin={()=>{setShowPopup(false);setPopupDone(true);setLoginOpen(true);}}/>
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* ══ SIGNUP MODAL ══ */}
+      {signupOpen&&(
+        <>
+          <div className="fi" onClick={()=>setSignupOpen(false)} style={{position:"fixed",inset:0,background:"rgba(0,0,0,.45)",zIndex:500}}/>
+          <div style={{position:"fixed",top:0,left:0,right:0,bottom:0,display:"flex",alignItems:"center",justifyContent:"center",zIndex:501,pointerEvents:"none"}}>
+            <div className="mi" style={{background:T.card,borderRadius:22,padding:"36px 28px",width:"min(420px,92vw)",boxShadow:"0 22px 56px rgba(0,0,0,.18)",textAlign:"center",position:"relative",pointerEvents:"auto"}}>
+              <button onClick={()=>setSignupOpen(false)} className="btn" style={{position:"absolute",top:14,right:14,background:"rgba(0,0,0,.07)",borderRadius:"50%",width:28,height:28,fontSize:16,color:T.tm,display:"flex",alignItems:"center",justifyContent:"center"}}>×</button>
+              <div style={{fontSize:28,color:T.p,marginBottom:10}}>✦</div>
+              <h2 style={{fontFamily:"var(--font-heading,"+FONTS[hf]+")",fontSize:26,color:T.text,fontWeight:400,marginBottom:6}}>Join {cfg.shopName}</h2>
+              <p style={{fontSize:13,color:T.p,marginBottom:22}}>🎁 Get {cfg.discPct}% off your first order!</p>
+              <SignupForm cfg={cfg} subs={subs} saveSubs={saveSubs} toast={toast} onDone={()=>setSignupOpen(false)} onLogin={()=>{setSignupOpen(false);setLoginOpen(true);}}/>
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* ══ LOGIN MODAL ══ */}
+      {loginOpen&&(
+        <>
+          <div className="fi" onClick={()=>setLoginOpen(false)} style={{position:"fixed",inset:0,background:"rgba(0,0,0,.45)",zIndex:500}}/>
+          <div style={{position:"fixed",top:0,left:0,right:0,bottom:0,display:"flex",alignItems:"center",justifyContent:"center",zIndex:501,pointerEvents:"none"}}>
+          <div className="mi" style={{background:T.card,borderRadius:22,padding:"32px 26px",width:"min(400px,90vw)",boxShadow:"0 22px 56px rgba(0,0,0,.18)",position:"relative",pointerEvents:"auto"}}>
+            <button onClick={()=>setLoginOpen(false)} className="btn" style={{position:"absolute",top:14,right:14,background:"none",fontSize:20,color:T.tm}}>×</button>
+            <div style={{textAlign:"center",marginBottom:20}}>
+              <div style={{fontSize:28,color:T.p,marginBottom:8}}>✦</div>
+              <h2 style={{fontFamily:"var(--font-heading,"+FONTS[hf]+")",fontSize:24,color:T.text,fontWeight:400}}>Welcome Back</h2>
+              <p style={{fontSize:13,color:T.tl,marginTop:6}}>Enter your email to check your discount status</p>
+            </div>
+            <LoginForm subs={subs} toast={toast} cfg={cfg} onClose={()=>setLoginOpen(false)}/>
+          </div>
           </div>
         </>
       )}
@@ -369,6 +412,31 @@ function App(){
 }
 
 /* Newsletter bar in footer */
+
+function LoginForm({subs,toast,cfg,onClose}){
+  const[email,setEmail]=useState("");
+  const check=()=>{
+    if(!email||!/\S+@\S+\.\S+/.test(email)){toast("Enter a valid email.");return;}
+    const sub=subs.find(s=>s.email===email.toLowerCase());
+    if(sub){
+      if(sub.disc&&!sub.discUsed)toast("✅ Active discount found! Use your email as promo code at checkout.");
+      else if(sub.discUsed)toast("Your discount has already been used.");
+      else toast("✅ You're subscribed! No discount on this account.");
+      onClose();
+    } else {
+      toast("Email not found. Sign up to get "+cfg.discPct+"% off!");
+      onClose();
+    }
+  };
+  return(
+    <div style={{display:"flex",flexDirection:"column",gap:8}}>
+      <input value={email} onChange={e=>setEmail(e.target.value)} onKeyDown={e=>e.key==="Enter"&&check()} placeholder="Enter your email" style={{...iSt({borderRadius:50,textAlign:"center"})}}/>
+      <button onClick={check} className="btn" style={{padding:"12px",background:T.p,color:"#fff",borderRadius:50,fontSize:14,fontWeight:600}}>Check Status ✦</button>
+      <button onClick={onClose} className="btn" style={{background:"none",color:T.tl,fontSize:12}}>Cancel</button>
+    </div>
+  );
+}
+
 function NewsletterBar({cfg,subs,saveSubs,toast}){
   const[email,setEmail]=useState("");
   const sub=()=>{
@@ -389,7 +457,7 @@ function NewsletterBar({cfg,subs,saveSubs,toast}){
   );
 }
 
-function PopupEmailForm({cfg,subs,saveSubs,toast,onDone}){
+function PopupEmailForm({cfg,subs,saveSubs,toast,onDone,btnLabel}){
   const[email,setEmail]=useState("");
   const sub=()=>{
     if(!email||!/\S+@\S+\.\S+/.test(email)){toast("Enter a valid email.");return;}
@@ -400,8 +468,33 @@ function PopupEmailForm({cfg,subs,saveSubs,toast,onDone}){
   return(
     <div style={{display:"flex",flexDirection:"column",gap:8}}>
       <input value={email} onChange={e=>setEmail(e.target.value)} onKeyDown={e=>e.key==="Enter"&&sub()} placeholder="Enter your email" style={{...iSt({borderRadius:50,textAlign:"center"})}}/>
-      <button onClick={sub} className="btn" style={{padding:"12px",background:T.p,color:"#fff",borderRadius:50,fontSize:14,fontWeight:600}}>Get {cfg.discPct}% Off ✦</button>
+      <button onClick={sub} className="btn" style={{padding:"12px",background:T.p,color:"#fff",borderRadius:50,fontSize:14,fontWeight:600}}>{btnLabel||"Get "+cfg.discPct+"% Off ✦"}</button>
       <button onClick={onDone} className="btn" style={{background:"none",color:T.tl,fontSize:12,padding:"4px"}}>No thanks</button>
+    </div>
+  );
+}
+
+function SignupForm({cfg,subs,saveSubs,toast,onDone,onLogin}){
+  const[name,setName]=React.useState("");
+  const[email,setEmail]=React.useState("");
+  const[pass,setPass]=React.useState("");
+  const[err,setErr]=React.useState("");
+  const submit=()=>{
+    if(!name.trim()){setErr("Please enter your name.");return;}
+    if(!email||!/\S+@\S+\.\S+/.test(email)){setErr("Enter a valid email.");return;}
+    if(pass.length<6){setErr("Password must be at least 6 characters.");return;}
+    if(subs.find(s=>s.email===email.toLowerCase())){toast("Already subscribed! Check your discount at login. ✦");onDone();return;}
+    saveSubs([...subs,{id:uid(),name,email:email.toLowerCase(),pass,disc:true,discUsed:false,date:new Date().toISOString()}]);
+    toast("Account created! Your "+cfg.discPct+"% discount is ready ✦");onDone();
+  };
+  return(
+    <div style={{display:"flex",flexDirection:"column",gap:10}}>
+      <input value={name} onChange={e=>{setName(e.target.value);setErr("");}} placeholder="Your name" style={iSt({borderRadius:10})}/>
+      <input value={email} onChange={e=>{setEmail(e.target.value);setErr("");}} placeholder="Email address" type="email" style={iSt({borderRadius:10})}/>
+      <input value={pass} onChange={e=>{setPass(e.target.value);setErr("");}} placeholder="Password" type="password" onKeyDown={e=>e.key==="Enter"&&submit()} style={iSt({borderRadius:10})}/>
+      {err&&<p style={{fontSize:12,color:"#E54040",textAlign:"left",marginTop:-4}}>{err}</p>}
+      <button onClick={submit} className="btn" style={{padding:"13px",background:T.p,color:"#fff",borderRadius:10,fontSize:14,fontWeight:600,marginTop:2}}>Create Account</button>
+      <p style={{fontSize:13,color:T.tl,marginTop:4}}>Already have an account? <button onClick={onLogin} className="btn" style={{background:"none",color:T.p,fontSize:13,fontWeight:600,textDecoration:"underline",padding:0}}>Log in</button></p>
     </div>
   );
 }
@@ -409,19 +502,17 @@ function PopupEmailForm({cfg,subs,saveSubs,toast,onDone}){
 /* ──── HOME PAGE ──── */
 function HomePage({cfg,items,onNav,currency}){
   const hf=cfg.fontHeading||"Cormorant Garamond";
-  const heroStyle=cfg.heroImage
-    ?{backgroundImage:"url("+cfg.heroImage+")",backgroundSize:"cover",backgroundPosition:"center"}
-    :{background:cfg.heroBgColor||"#1A1220"};
   const overlay=cfg.heroOverlay||55;
   return(
     <div>
       {/* 1. HERO */}
-      <div style={{...heroStyle,minHeight:"92vh",display:"flex",alignItems:"center",justifyContent:"center",textAlign:"center",position:"relative",overflow:"hidden"}}>
-        <div style={{position:"absolute",inset:0,background:"rgba(0,0,0,"+overlay/100+")"}}/>
+      <div style={{display:"flex",alignItems:"center",justifyContent:"center",textAlign:"center",position:"relative",overflow:"hidden",minHeight:cfg.heroImage?"unset":"70vh",background:cfg.heroImage?"transparent":cfg.heroBgColor||"#1A1220"}}>
+        {cfg.heroImage&&<img src={cfg.heroImage} alt="hero" style={{position:"absolute",inset:0,width:"100%",height:"100%",objectFit:"contain",objectPosition:"center",zIndex:0,display:"block"}}/>}
+        <div style={{position:"absolute",inset:0,background:"rgba(0,0,0,"+overlay/100+")",zIndex:1}}/>
         {[{t:"8%",l:"5%",s:24,d:0},{t:"20%",r:"6%",s:16,d:1.2},{b:"12%",r:"8%",s:20,d:.6},{b:"22%",l:"9%",s:14,d:1.8}].map((p,i)=>(
-          <span key={i} className="fl" style={{position:"absolute",fontSize:p.s,opacity:.25,color:cfg.colorPrimary||"#D4AF37",top:p.t,bottom:p.b,left:p.l,right:p.r,animationDelay:p.d+"s",zIndex:1}}>✦</span>
+          <span key={i} className="fl" style={{position:"absolute",fontSize:p.s,opacity:.25,color:cfg.colorPrimary||"#D4AF37",top:p.t,bottom:p.b,left:p.l,right:p.r,animationDelay:p.d+"s",zIndex:2}}>✦</span>
         ))}
-        <div style={{position:"relative",zIndex:2,padding:"0 24px",maxWidth:760}}>
+        <div style={{position:"relative",zIndex:3,padding:"60px 24px",maxWidth:760}}>
           <div className="fu" style={{animationDelay:"0ms"}}>
             <p style={{fontSize:11,letterSpacing:".4em",textTransform:"uppercase",color:T.p,marginBottom:16,fontWeight:500}}>✦ handcrafted jewelry ✦</p>
           </div>
@@ -443,7 +534,7 @@ function HomePage({cfg,items,onNav,currency}){
       {/* 2. DESCRIPTION */}
       {cfg.descVisible!==false&&cfg.descText&&(
         <div style={{textAlign:"center",padding:"64px 24px",maxWidth:680,margin:"0 auto"}}>
-          <p style={{fontFamily:"var(--font-heading,"+FONTS[hf]+")",fontSize:"clamp(16px,2.5vw,22px)",color:T.tm,lineHeight:1.9,fontStyle:"italic"}}>{cfg.descText}</p>
+          <p style={{fontFamily:"var(--font-heading,"+FONTS[hf]+")",fontSize:"clamp(17px,2.8vw,24px)",color:T.tm,lineHeight:1.9,fontStyle:"italic"}}>{cfg.descText}</p>
         </div>
       )}
 
@@ -477,10 +568,21 @@ function HomePage({cfg,items,onNav,currency}){
           <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(280px,1fr))",gap:16,maxWidth:1160,margin:"0 auto"}}>
             {cfg.reviews.filter(r=>r.visible!==false).map(rv=>(
               <div key={rv.id} style={{background:T.card,borderRadius:18,padding:"22px 20px",boxShadow:T.sh,border:"1px solid "+T.b}}>
-                <Stars rating={rv.stars||5}/>
-                <p style={{fontSize:14,color:T.tm,lineHeight:1.8,margin:"10px 0 12px",fontStyle:"italic"}}>"{rv.text}"</p>
-                <p style={{fontSize:12,fontWeight:600,color:T.text}}>— {rv.name}</p>
-                {rv.date&&<p style={{fontSize:11,color:T.tl,marginTop:2}}>{rv.date}</p>}
+                <div style={{display:"flex",alignItems:"flex-start",gap:12,marginBottom:12}}>
+                  {rv.photo?(
+                    <div style={{width:44,height:44,borderRadius:"50%",overflow:"hidden",flexShrink:0,border:"2px solid "+T.p+"33"}}>
+                      <img src={rv.photo} alt={rv.name} onError={e=>e.target.style.display="none"} style={{width:"100%",height:"100%",objectFit:"cover"}}/>
+                    </div>
+                  ):(
+                    <div style={{width:44,height:44,borderRadius:"50%",background:T.p+"22",flexShrink:0,display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,fontWeight:700,color:T.p}}>{(rv.name||"?")[0].toUpperCase()}</div>
+                  )}
+                  <div>
+                    <p style={{fontSize:13,fontWeight:600,color:T.text}}>{rv.name}</p>
+                    {rv.date&&<p style={{fontSize:11,color:T.tl}}>{rv.date}</p>}
+                    <Stars rating={rv.stars||5}/>
+                  </div>
+                </div>
+                <p style={{fontSize:14,color:T.tm,lineHeight:1.8,fontStyle:"italic"}}>"{rv.text}"</p>
               </div>
             ))}
           </div>
@@ -543,9 +645,9 @@ function ProductCard({item,cfg,onItem,currency}){
   return(
     <div className="product-card" onMouseEnter={()=>setH(true)} onMouseLeave={()=>setH(false)} onClick={onItem}
       style={{background:T.card,borderRadius:18,overflow:"hidden",boxShadow:h?T.sh2:T.sh,cursor:"pointer",border:"1px solid "+T.b}}>
-      <div style={{position:"relative",paddingTop:"100%",background:"linear-gradient(135deg,"+T.p+"15,"+T.p+"08)",overflow:"hidden"}}>
+      <div style={{position:"relative",background:"linear-gradient(135deg,"+T.p+"15,"+T.p+"08)",overflow:"hidden"}}>
         {item.images&&item.images[0]
-          ?<img src={item.images[0]} alt={item.name} onError={e=>e.target.style.display="none"} style={{position:"absolute",inset:0,width:"100%",height:"100%",objectFit:"cover",transition:"transform .4s",transform:h?"scale(1.06)":"scale(1)"}}/>
+          ?<img src={item.images[0]} alt={item.name} onError={e=>e.target.style.display="none"} style={{display:"block",width:"100%",height:"auto",objectFit:"contain",transition:"transform .4s",transform:h?"scale(1.06)":"scale(1)"}}/>
           :<div style={{position:"absolute",inset:0,display:"flex",alignItems:"center",justifyContent:"center",fontSize:48,color:T.p+"66"}}>✦</div>
         }
         {item.tags?.includes("new")&&<div style={{position:"absolute",top:10,right:10,background:T.p,color:"#fff",borderRadius:50,padding:"3px 10px",fontSize:9,fontWeight:700,letterSpacing:".08em"}}>NEW</div>}
@@ -664,9 +766,9 @@ function ItemPage({item,items,cfg,onBack,onAdd,onItem,currency}){
       <div className="item-page-grid" style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(280px,1fr))",gap:44,marginBottom:44}}>
         {/* Left: media */}
         <div>
-          <div style={{borderRadius:22,overflow:"hidden",paddingTop:"100%",position:"relative",background:T.p+"12",boxShadow:T.sh2}}>
+          <div style={{borderRadius:22,overflow:"hidden",background:T.p+"12",boxShadow:T.sh2}}>
             {mediaList[si]
-              ?<img src={mediaList[si]} alt={item.name} onError={e=>e.target.style.display="none"} style={{position:"absolute",inset:0,width:"100%",height:"100%",objectFit:"cover"}}/>
+              ?<img src={mediaList[si]} alt={item.name} onError={e=>e.target.style.display="none"} style={{display:"block",width:"100%",height:"auto",objectFit:"contain"}}/>
               :<div style={{position:"absolute",inset:0,display:"flex",alignItems:"center",justifyContent:"center",fontSize:64,color:T.p+"66"}}>✦</div>
             }
           </div>
@@ -1154,6 +1256,7 @@ function AdminPage({ok,onAuth,cfg,saveCfg,items,saveItems,subs,saveSubs,orders,o
                         </select>
                       </div>
                       <textarea value={rv.text} onChange={e=>{const r=[...(ec.reviews||[])];r[i]={...r[i],text:e.target.value};se("reviews",r);}} rows={2} placeholder="Review text…" style={{...iSt(),resize:"vertical",borderRadius:9,marginBottom:5}}/>
+                      <input value={rv.photo||""} onChange={e=>{const r=[...(ec.reviews||[])];r[i]={...r[i],photo:e.target.value};se("reviews",r);}} placeholder="Customer photo URL (optional, small profile pic)" style={{...iSt(),fontSize:12,marginBottom:5}}/>
                       <input value={rv.date||""} onChange={e=>{const r=[...(ec.reviews||[])];r[i]={...r[i],date:e.target.value};se("reviews",r);}} placeholder="Date (e.g. January 2025)" style={{...iSt(),fontSize:12}}/>
                     </div>
                     <div style={{display:"flex",flexDirection:"column",gap:5,flexShrink:0,alignItems:"center"}}>
