@@ -185,13 +185,23 @@ function App(){
   useEffect(()=>{(async()=>{
     const cloud=await JB.pull(DCFG.jbKey,DCFG.jbId);
     if(cloud){
-      const merged={...DCFG,...(cloud.cfg||{})};
+      const cloudCfg=cloud.cfg||{};
+      const merged={...DCFG,...cloudCfg};
+      // Keep the working URL in this file if an older saved config still has the placeholder.
+      if(!merged.ordersScriptUrl||String(merged.ordersScriptUrl).includes("PASTE_YOUR_GOOGLE")){
+        merged.ordersScriptUrl=DCFG.ordersScriptUrl;
+      }
       buildT(merged);setCfgS(merged);LS.s("jj:cfg",merged);
       setItemsS(cloud.items||[]);LS.s("jj:items",cloud.items||[]);
       setSubsS(cloud.subs||[]);LS.s("jj:subs",cloud.subs||[]);
       setOrdersS(cloud.orders||[]);LS.s("jj:orders",cloud.orders||[]);
     } else {
-      const lc=LS.g("jj:cfg")||DCFG;buildT(lc);setCfgS(lc);
+      const lc={...DCFG,...(LS.g("jj:cfg")||{})};
+      // Also repair an old browser-saved placeholder URL.
+      if(!lc.ordersScriptUrl||String(lc.ordersScriptUrl).includes("PASTE_YOUR_GOOGLE")){
+        lc.ordersScriptUrl=DCFG.ordersScriptUrl;
+      }
+      buildT(lc);setCfgS(lc);LS.s("jj:cfg",lc);
       setItemsS(LS.g("jj:items")||[]);
       setSubsS(LS.g("jj:subs")||[]);
       setOrdersS(LS.g("jj:orders")||[]);
