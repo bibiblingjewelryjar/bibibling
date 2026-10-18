@@ -97,6 +97,8 @@ const DCFG={
   shopName:"Mystery Jewelry Jar",
   tagline:"Handcrafted treasures, wrapped in mystery ✦",
   whatsapp:"60123456789",adminPass:"admin123",
+  ordersScriptUrl:"https://script.google.com/macros/s/AKfycbzMmgIjjVby6EhXOc2FcS8znNXpj7AtAsmI3u3EFB0_XwapPqAyoqGiuu_8JIU-HxZ4/exec",
+  paymentInstructions:"Please pay by DuitNow QR or bank transfer. Use your order number as the payment reference. Your order is pending until payment is verified.",
   jbKey:"$2a$10$W/j7J0jh5tadjL3MGaYfr.LYB.xGtex.6v.Sjl/SbxjNrbLY5irO.",
   jbId:"6a1176d26610dd3ae890f422",
   colorPrimary:"#D4AF37",colorBg:"#FAF6EE",colorCard:"#FFFFFF",
@@ -114,8 +116,8 @@ const DCFG={
   shippingWM:10,shippingEM:15,
   discPct:10,promoCode:"",promoPct:0,
   aboutText:"We are Mystery Jewelry Jar — a small handcrafted jewelry brand built on love and creativity. Each jar is carefully packed with unique pieces chosen just for you.",
-  contactEmail:"hello@mysteryjewelryjar.com",contactIG:"@mysteryjewelryjar",contactIGUrl:"https://instagram.com/mysteryjewelryjar",contactTT:"@mysteryjewelryjar",contactTTUrl:"https://tiktok.com/@mysteryjewelryjar",
-  popupVisible:true,popupTitle:"Welcome! ✦",popupText:"Sign up and get 10% off your first order!",
+  contactEmail:"hello@mysteryjewelryjar.com",contactIG:"@mysteryjewelryjar",contactIGUrl:"https://instagram.com/mysteryjewelryjar",contactTT:"@bibibling.mysterybox",contactTTUrl:"https://www.tiktok.com/@bibibling.mysterybox",
+  popupVisible:false,popupTitle:"Welcome! ✦",popupText:"Sign up and get 10% off your first order!",
   newsletterTitle:"Stay in the loop ✦",newsletterText:"Be the first to know about new jars and special drops.",
   currencyAuto:true,
   loadingBg:"#1A1220",loadingText:"unwrapping your magic…",loadingImage:"",
@@ -176,10 +178,8 @@ function App(){
   const[orders,setOrdersS]=useState([]);
   const[notif,setNotif]=useState(null);const[loading,setLoading]=useState(true);
   const[menuOpen,setMenuOpen]=useState(false);const[cartOpen,setCartOpen]=useState(false);
-  const[popupDone,setPopupDone]=useState(false);const[showPopup,setShowPopup]=useState(false);
   const[adminOk,setAdminOk]=useState(false);const[currency,setCurrency]=useState("RM");
   const[searchQ,setSearchQ]=useState("");const[searchOpen,setSearchOpen]=useState(false);
-  const[loginOpen,setLoginOpen]=useState(false);const[signupOpen,setSignupOpen]=useState(false);
   const logoTaps=useRef(0);const logoTimer=useRef(null);
 
   useEffect(()=>{(async()=>{
@@ -205,11 +205,7 @@ function App(){
     }
   })();},[]);
 
-  useEffect(()=>{
-    if(!loading&&!popupDone&&cfg.popupVisible){
-      const t=setTimeout(()=>{setShowPopup(true);},3500);return()=>clearTimeout(t);
-    }
-  },[loading,cfg.popupVisible,popupDone]);
+  // Welcome/signup popup disabled by request.
 
   const syncCloud=async(ni,ns,no,nc)=>{
     const c=nc||cfg;if(!c.jbKey||!c.jbId)return;
@@ -274,8 +270,6 @@ function App(){
               🛒
               {cnt>0&&<span style={{position:"absolute",top:-4,right:-4,background:T.p,color:"#fff",borderRadius:"50%",width:16,height:16,fontSize:9,fontWeight:700,display:"flex",alignItems:"center",justifyContent:"center"}}>{cnt}</span>}
             </button>
-            <button onClick={()=>setLoginOpen(true)} className="btn hide-sm" style={{background:"none",border:"1.5px solid "+T.b,borderRadius:50,padding:"5px 13px",fontSize:12,color:T.text}}>Login</button>
-            <button onClick={()=>setSignupOpen(true)} className="btn hide-sm" style={{background:T.p,borderRadius:50,padding:"5px 13px",fontSize:12,color:"#fff",fontWeight:600}}>Sign Up</button>
           </div>
         </div>
         {searchOpen&&(
@@ -303,10 +297,6 @@ function App(){
             </div>
             <div style={{padding:"16px 20px",borderTop:"1px solid "+T.b,display:"flex",flexDirection:"column",gap:8}}>
               <button onClick={()=>nav("catalog")} className="btn" style={{width:"100%",padding:"12px",background:T.p,color:"#fff",borderRadius:11,fontSize:14,fontWeight:600}}>Shop Now ✦</button>
-              <div style={{display:"flex",gap:8}}>
-                <button onClick={()=>{setMenuOpen(false);setSignupOpen(true);}} className="btn" style={{flex:1,padding:"10px",background:T.p+"18",border:"1.5px solid "+T.p,borderRadius:11,color:T.p,fontSize:13,fontWeight:600}}>Sign Up</button>
-                <button onClick={()=>{setMenuOpen(false);setLoginOpen(true);}} className="btn" style={{flex:1,padding:"10px",background:"none",border:"1.5px solid "+T.b,borderRadius:11,color:T.text,fontSize:13}}>Login</button>
-              </div>
             </div>
           </div>
         </>
@@ -349,8 +339,7 @@ function App(){
               {cfg.contactEmail&&<span style={{display:"block",fontSize:13}}>✉️ {cfg.contactEmail}</span>}
             </div>
           </div>
-          {/* Newsletter */}
-          <NewsletterBar cfg={cfg} subs={subs} saveSubs={saveSubs} toast={toast}/>
+          {/* Newsletter removed: orders are collected at checkout. */}
           <div style={{borderTop:"1px solid rgba(255,255,255,.07)",paddingTop:16,maxWidth:1160,margin:"0 auto",display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:8}}>
             <p style={{fontSize:12}}>© {new Date().getFullYear()} {cfg.shopName}. All rights reserved.</p>
             <button onClick={()=>nav("admin")} className="btn" style={{background:"none",color:"rgba(255,255,255,.06)",fontSize:11,padding:0}} onMouseEnter={e=>e.currentTarget.style.color="rgba(255,255,255,.2)"} onMouseLeave={e=>e.currentTarget.style.color="rgba(255,255,255,.06)"}>manage</button>
@@ -358,55 +347,7 @@ function App(){
         </footer>
       )}
 
-      {/* ══ POPUP ══ */}
-      {showPopup&&cfg.popupVisible&&(
-        <>
-          <div className="fi" onClick={()=>{setShowPopup(false);setPopupDone(true);}} style={{position:"fixed",inset:0,background:"rgba(0,0,0,.5)",zIndex:500}}/>
-          <div style={{position:"fixed",top:0,left:0,right:0,bottom:0,display:"flex",alignItems:"center",justifyContent:"center",zIndex:501,pointerEvents:"none"}}>
-            <div className="mi" style={{background:T.card,borderRadius:24,padding:"36px 28px",width:"min(400px,90vw)",maxWidth:400,textAlign:"center",boxShadow:"0 24px 60px rgba(0,0,0,.22)",position:"relative",pointerEvents:"auto"}}>
-              <button onClick={()=>{setShowPopup(false);setPopupDone(true);}} className="btn" style={{position:"absolute",top:14,right:14,background:"rgba(0,0,0,.07)",borderRadius:"50%",width:28,height:28,fontSize:16,color:T.tm,display:"flex",alignItems:"center",justifyContent:"center"}}>×</button>
-              <div className="fl" style={{fontSize:36,marginBottom:12,color:T.p}}>✦</div>
-              <h2 style={{fontFamily:"var(--font-heading,"+FONTS[hf]+")",fontSize:26,color:T.text,marginBottom:8,fontWeight:400}}>{cfg.popupTitle}</h2>
-              <p style={{fontSize:14,color:T.tm,marginBottom:20,lineHeight:1.7}}>{cfg.popupText}</p>
-              <SignupForm cfg={cfg} subs={subs} saveSubs={saveSubs} toast={toast} onDone={()=>{setShowPopup(false);setPopupDone(true);}} onLogin={()=>{setShowPopup(false);setPopupDone(true);setLoginOpen(true);}}/>
-            </div>
-          </div>
-        </>
-      )}
-
-      {/* ══ SIGNUP MODAL ══ */}
-      {signupOpen&&(
-        <>
-          <div className="fi" onClick={()=>setSignupOpen(false)} style={{position:"fixed",inset:0,background:"rgba(0,0,0,.45)",zIndex:500}}/>
-          <div style={{position:"fixed",top:0,left:0,right:0,bottom:0,display:"flex",alignItems:"center",justifyContent:"center",zIndex:501,pointerEvents:"none"}}>
-            <div className="mi" style={{background:T.card,borderRadius:22,padding:"36px 28px",width:"min(420px,92vw)",boxShadow:"0 22px 56px rgba(0,0,0,.18)",textAlign:"center",position:"relative",pointerEvents:"auto"}}>
-              <button onClick={()=>setSignupOpen(false)} className="btn" style={{position:"absolute",top:14,right:14,background:"rgba(0,0,0,.07)",borderRadius:"50%",width:28,height:28,fontSize:16,color:T.tm,display:"flex",alignItems:"center",justifyContent:"center"}}>×</button>
-              <div style={{fontSize:28,color:T.p,marginBottom:10}}>✦</div>
-              <h2 style={{fontFamily:"var(--font-heading,"+FONTS[hf]+")",fontSize:26,color:T.text,fontWeight:400,marginBottom:6}}>Join {cfg.shopName}</h2>
-              <p style={{fontSize:13,color:T.p,marginBottom:22}}>🎁 Get {cfg.discPct}% off your first order!</p>
-              <SignupForm cfg={cfg} subs={subs} saveSubs={saveSubs} toast={toast} onDone={()=>setSignupOpen(false)} onLogin={()=>{setSignupOpen(false);setLoginOpen(true);}}/>
-            </div>
-          </div>
-        </>
-      )}
-
-      {/* ══ LOGIN MODAL ══ */}
-      {loginOpen&&(
-        <>
-          <div className="fi" onClick={()=>setLoginOpen(false)} style={{position:"fixed",inset:0,background:"rgba(0,0,0,.45)",zIndex:500}}/>
-          <div style={{position:"fixed",top:0,left:0,right:0,bottom:0,display:"flex",alignItems:"center",justifyContent:"center",zIndex:501,pointerEvents:"none"}}>
-          <div className="mi" style={{background:T.card,borderRadius:22,padding:"32px 26px",width:"min(400px,90vw)",boxShadow:"0 22px 56px rgba(0,0,0,.18)",position:"relative",pointerEvents:"auto"}}>
-            <button onClick={()=>setLoginOpen(false)} className="btn" style={{position:"absolute",top:14,right:14,background:"none",fontSize:20,color:T.tm}}>×</button>
-            <div style={{textAlign:"center",marginBottom:20}}>
-              <div style={{fontSize:28,color:T.p,marginBottom:8}}>✦</div>
-              <h2 style={{fontFamily:"var(--font-heading,"+FONTS[hf]+")",fontSize:24,color:T.text,fontWeight:400}}>Welcome Back</h2>
-              <p style={{fontSize:13,color:T.tl,marginTop:6}}>Enter your email to check your discount status</p>
-            </div>
-            <LoginForm subs={subs} toast={toast} cfg={cfg} onClose={()=>setLoginOpen(false)}/>
-          </div>
-          </div>
-        </>
-      )}
+      {/* Signup/login popups removed by request. */}
     </div>
   );
 }
@@ -965,36 +906,30 @@ function CartPage({cart,cfg,onQty,onRem,onBack,saveOrders,orders,currency,subs,s
     setPromoErr("Invalid code. Try your email address if you subscribed.");
   };
 
-  const checkout=()=>{
+  const [submitting,setSubmitting]=useState(false);
+  const [orderNotice,setOrderNotice]=useState("");
+  const checkout=async()=>{
     if(!name.trim()){setFormErr("Please enter your name.");return;}
     if(!phone.trim()){setFormErr("Please enter your phone number.");return;}
     if(!addr.trim()){setFormErr("Please enter your address.");return;}
     if(!state){setFormErr("Please select your state.");return;}
-    setFormErr("");
-    const lines=cart.map(c=>{
-      let l="• "+c.name+" x"+c.qty+" — "+cur+(((c.choices?.varPrice||c.price)*c.qty).toFixed(2));
-      const ch=[];
-      if(c.choices?.color)ch.push("Color: "+c.choices.color);
-      if(c.choices?.size)ch.push("Size: "+c.choices.size);
-      if(c.choices?.style)ch.push("Style: "+c.choices.style);
-      if(c.choices?.note)ch.push("Note: "+c.choices.note);
-      if(ch.length)l+="\n  ("+ch.join(", ")+")";
-      return l;
-    }).join("\n");
-    let msg="Hello! I'd like to place an order ✦\n\n*Order Details:*\n"+lines+"\n\n";
-    if(discAmt>0)msg+="Discount: -"+cur+discAmt.toFixed(2)+"\n";
-    msg+="Shipping ("+state+"): "+cur+shipping.toFixed(2)+"\n";
-    msg+="*Total: "+cur+total.toFixed(2)+"*\n\n";
-    msg+="Name: "+name+"\nPhone: "+phone+"\nAddress: "+addr+", "+state;
-    window.open("https://wa.me/"+(cfg.whatsapp||"60123456789")+"?text="+encodeURIComponent(msg),"_blank");
-    // Save order
-    const newOrder={id:uid(),date:new Date().toISOString(),name,phone,state,total,items:cart.map(c=>c.name+"x"+c.qty)};
-    saveOrders([...orders,newOrder]);
-    // Mark sub discount used
-    if(promoApplied==="sub"&&promoInput){
-      const updated=subs.map(s=>s.email===promoInput.toLowerCase()?{...s,discUsed:true}:s);
-      saveSubs(updated);
-    }
+    if(!cart.length){setFormErr("Your cart is empty.");return;}
+    const endpoint=cfg.ordersScriptUrl||"PASTE_YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE";
+    if(endpoint.includes("PASTE_YOUR_GOOGLE")){setFormErr("The shop owner needs to connect Google Sheets before orders can be submitted.");return;}
+    setFormErr("");setSubmitting(true);setOrderNotice("");
+    const orderId="BB-"+Date.now().toString().slice(-8);
+    const order={id:orderId,date:new Date().toISOString(),name:name.trim(),phone:phone.trim(),address:addr.trim(),state,items:cart.map(c=>({name:c.name,qty:c.qty,unitPrice:(c.choices?.varPrice||c.price),choices:c.choices||{}})),subtotal:sub,discount:discAmt,shipping,total,currency:cur,paymentMethod:"DuitNow QR / Bank Transfer",paymentStatus:"Pending",orderStatus:"New"};
+    try{
+      const response=await fetch(endpoint,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(order)});
+      const result=await response.json();
+      if(!response.ok||!result.success)throw new Error(result.error||"Order submission failed");
+      const msg="Order "+orderId+" submitted successfully.\n\nTotal: "+cur+total.toFixed(2)+"\n\n"+(cfg.paymentInstructions||"Please pay by DuitNow QR or bank transfer. Use your order number as the payment reference.");
+      setOrderNotice(msg);
+      const newOrder={id:orderId,date:order.date,name:order.name,phone:order.phone,state,total,items:order.items.map(c=>c.name+" x"+c.qty),paymentStatus:"Pending",orderStatus:"New"};
+      saveOrders([...orders,newOrder]);
+      if(promoApplied==="sub"&&promoInput){const updated=subs.map(s=>s.email===promoInput.toLowerCase()?{...s,discUsed:true}:s);saveSubs(updated);}
+    }catch(err){setFormErr("We couldn't submit your order. Please try again in a moment. If this continues, contact the shop owner through TikTok.");}
+    finally{setSubmitting(false);}
   };
 
   return(
@@ -1073,9 +1008,10 @@ function CartPage({cart,cfg,onQty,onRem,onBack,saveOrders,orders,currency,subs,s
               <div style={{display:"flex",justifyContent:"space-between",marginTop:9,paddingTop:9,borderTop:"1px solid "+T.b}}><span style={{fontSize:15,fontWeight:700,color:T.text}}>Total</span><span style={{fontSize:18,fontWeight:700,color:T.text}}>{cur}{state?total.toFixed(2):"—"}</span></div>
             </div>
             {formErr&&<p style={{fontSize:13,color:"#E54040"}}>{formErr}</p>}
-            <button onClick={checkout} className="btn" style={{width:"100%",padding:"14px",background:"#25D366",color:"#fff",borderRadius:14,fontSize:15,fontWeight:700,display:"flex",alignItems:"center",justifyContent:"center",gap:10,boxShadow:"0 4px 16px rgba(37,211,102,.3)"}}>
-              <span>💬</span><span>Checkout via WhatsApp</span>
+            <button onClick={checkout} className="btn" style={{width:"100%",padding:"14px",background:T.p,color:"#fff",borderRadius:14,fontSize:15,fontWeight:700,display:"flex",alignItems:"center",justifyContent:"center",gap:10,boxShadow:"0 4px 16px rgba(37,211,102,.3)"}}>
+              <span>✦</span><span>{submitting?"Submitting order…":"Place Order"}</span>
             </button>
+            {orderNotice&&<div style={{marginTop:10,padding:14,borderRadius:12,background:T.p+"12",border:"1px solid "+T.b,whiteSpace:"pre-line",fontSize:13,color:T.text}}><strong>Order received ✦</strong>{"\n"}{orderNotice}{"\n\n"}<strong>Payment details</strong>{"\n"}{cfg.paymentInstructions||"Shop owner: add your DuitNow QR or bank transfer details in the shop settings before accepting orders."}</div>}
           </div>
         </div>
       )}
@@ -1318,19 +1254,6 @@ function AdminPage({ok,onAuth,cfg,saveCfg,items,saveItems,subs,saveSubs,orders,o
               </div>
             ))}
             <button onClick={()=>se("faqs",[...(ec.faqs||[]),{id:uid(),q:"",a:"",visible:true}])} className="btn" style={{width:"100%",background:T.bg,border:"1px dashed "+T.b,borderRadius:9,padding:"7px",fontSize:12,color:T.tm}}>+ Add FAQ</button>
-          </SBox>
-          <SBox title="🪟 Popup Settings">
-            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}><Lbl c="Show popup to new visitors"/><Toggle on={ec.popupVisible!==false} onChange={()=>se("popupVisible",ec.popupVisible===false)}/></div>
-            <div style={{display:"flex",flexDirection:"column",gap:9}}>
-              <div><Lbl c="Popup Title"/><input value={ec.popupTitle||""} onChange={e=>se("popupTitle",e.target.value)} style={iSt()}/></div>
-              <div><Lbl c="Popup Text"/><input value={ec.popupText||""} onChange={e=>se("popupText",e.target.value)} style={iSt()}/></div>
-            </div>
-          </SBox>
-          <SBox title="📧 Newsletter Settings">
-            <div style={{display:"flex",flexDirection:"column",gap:9}}>
-              <div><Lbl c="Newsletter Title"/><input value={ec.newsletterTitle||""} onChange={e=>se("newsletterTitle",e.target.value)} style={iSt()}/></div>
-              <div><Lbl c="Newsletter Subtitle"/><input value={ec.newsletterText||""} onChange={e=>se("newsletterText",e.target.value)} style={iSt()}/></div>
-            </div>
           </SBox>
           <button onClick={async()=>{await saveCfg(ec);toast("Homepage saved ✓");}} className="btn" style={{alignSelf:"flex-start",background:T.p,color:"#fff",borderRadius:50,padding:"12px 28px",fontSize:14,fontWeight:600}}>Save Homepage</button>
         </div>
