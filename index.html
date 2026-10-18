@@ -933,7 +933,7 @@ function CartPage({cart,cfg,onQty,onRem,onBack,saveOrders,orders,currency,subs,s
       const response=await fetch(endpoint,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(order)});
       const result=await response.json();
       if(!response.ok||!result.success)throw new Error(result.error||"Order submission failed");
-      const msg="Order "+orderId+" submitted successfully.\n\nTotal: "+cur+total.toFixed(2)+"\n\n"+(cfg.paymentInstructions||"Please pay by DuitNow QR or bank transfer. Use your order number as the payment reference.");
+      const msg="Order "+orderId+" submitted successfully.\n\nTotal: "+cur+total.toFixed(2);
       setOrderNotice(msg);
       const newOrder={id:orderId,date:order.date,name:order.name,phone:order.phone,state,total,items:order.items.map(c=>c.name+" x"+c.qty),paymentStatus:"Pending",orderStatus:"New"};
       saveOrders([...orders,newOrder]);
@@ -1024,8 +1024,21 @@ function CartPage({cart,cfg,onQty,onRem,onBack,saveOrders,orders,currency,subs,s
             {orderNotice&&<div style={{marginTop:10,padding:14,borderRadius:12,background:T.p+"12",border:"1px solid "+T.b,fontSize:13,color:T.text}}>
   <strong>Order received ✦</strong>
   <p style={{margin:"10px 0",whiteSpace:"pre-line"}}>{orderNotice}</p>
-  <strong>Payment details</strong>
-  <p style={{margin:"8px 0",whiteSpace:"pre-line"}}>{cfg.paymentInstructions||"Please contact us for DuitNow QR or bank transfer details. Use your order number as the payment reference. Your order remains pending until payment is verified."}</p>
+
+  <strong>Choose your payment method</strong>
+  <p style={{margin:"8px 0"}}>Please pay the exact order total and use your order number as the payment reference if supported. Your order remains pending until payment is verified.</p>
+
+  <div style={{marginTop:18,textAlign:"center"}}>
+    <strong>1. Touch ’n Go eWallet</strong>
+    <p>Scan this QR code to pay.</p>
+    <img src="./tng-ewallet-qr.jpeg" alt="Touch 'n Go eWallet payment QR" style={{display:"block",width:"100%",maxWidth:300,height:"auto",margin:"12px auto",borderRadius:8}} />
+  </div>
+
+  <div style={{marginTop:24,textAlign:"center"}}>
+    <strong>2. Bank transfer — Receive QR</strong>
+    <p>Scan using a supported banking app.</p>
+    <img src="./bank-receive-qr.jpeg" alt="Bank transfer Receive QR" style={{display:"block",width:"100%",maxWidth:260,height:"auto",margin:"12px auto",borderRadius:8}} />
+  </div>
 </div>}
           </div>
         </div>
