@@ -99,8 +99,8 @@ const DCFG={
   whatsapp:"60123456789",adminPass:"admin123",
   ordersScriptUrl:"https://script.google.com/macros/s/AKfycbyGFjmWvztESw9aVhwstMZ8Am3fSNKTYBSURfmaXkNUnHEu0vD14sJMIeSMaEG8YAL4/exec",
   paymentInstructions:"Please pay by DuitNow QR or bank transfer. Use your order number as the payment reference. Your order is pending until payment is verified.",
-  jbKey:"$2a$10$W/j7J0jh5tadjL3MGaYfr.LYB.xGtex.6v.Sjl/SbxjNrbLY5irO.",
-  jbId:"6a1176d26610dd3ae890f422",
+  cloudSyncUrl:"PASTE_CLOUD_SYNC_WEB_APP_URL_HERE",
+  cloudSyncToken:"",
   colorPrimary:"#D4AF37",colorBg:"#FAF6EE",colorCard:"#FFFFFF",
   colorFooter:"#1A1220",colorText:"#1A1220",colorAccent:"#1A1220",
   fontHeading:"Cormorant Garamond",fontBody:"Jost",
@@ -152,9 +152,9 @@ const LS={
   g:k=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):null}catch{return null}},
   s:(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch{}}
 };
-const JB={
-  async pull(k,id){if(!k||!id)return null;try{const r=await fetch("https://api.jsonbin.io/v3/b/"+id+"/latest",{headers:{"X-Master-Key":k}});if(!r.ok)return null;const d=await r.json();return d.record||null;}catch{return null;}},
-  async push(k,id,data){if(!k||!id)return false;try{const r=await fetch("https://api.jsonbin.io/v3/b/"+id,{method:"PUT",headers:{"X-Master-Key":k,"Content-Type":"application/json"},body:JSON.stringify(data)});return r.ok;}catch{return false;}}
+const CloudStore={
+  async pull(url){if(!url)return null;try{const r=await fetch(url+"?action=read&t="+Date.now(),{method:"GET",cache:"no-store"});if(!r.ok)return null;const d=await r.json();return d&&d.ok?d.data:null;}catch(e){console.warn("Cloud read failed",e);return null;}},
+  async push(url,token,data){if(!url||!token)return false;try{const r=await fetch(url,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({action:"save",token,data})});if(!r.ok)return false;const d=await r.json();return !!(d&&d.ok);}catch(e){console.warn("Cloud save failed",e);return false;}}
 };
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 
@@ -183,29 +183,21 @@ function App(){
   const logoTaps=useRef(0);const logoTimer=useRef(null);
 
   useEffect(()=>{(async()=>{
-    const cloud=await JB.pull(DCFG.jbKey,DCFG.jbId);
+    const localCfg={...DCFG,...(LS.g("jj:cfg")||{})};
+    const cloudUrl=(localCfg.cloudSyncUrl && !String(localCfg.cloudSyncUrl).includes("PASTE_CLOUD_SYNC"))?localCfg.cloudSyncUrl:DCFG.cloudSyncUrl;
+    const cloud=await CloudStore.pull(cloudUrl);
     if(cloud){
-      const cloudCfg=cloud.cfg||{};
-      const merged={...DCFG,...cloudCfg};
-      // Keep the working URL in this file if an older saved config still has the placeholder.
-      if(!merged.ordersScriptUrl||String(merged.ordersScriptUrl).includes("PASTE_YOUR_GOOGLE")){
-        merged.ordersScriptUrl=DCFG.ordersScriptUrl;
-      }
+      const merged={...DCFG,...(cloud.cfg||{}),...localCfg};
+      if(!merged.ordersScriptUrl||String(merged.ordersScriptUrl).includes("PASTE_YOUR_GOOGLE")) merged.ordersScriptUrl=DCFG.ordersScriptUrl;
       buildT(merged);setCfgS(merged);LS.s("jj:cfg",merged);
-      setItemsS(cloud.items||[]);LS.s("jj:items",cloud.items||[]);
-      setSubsS(cloud.subs||[]);LS.s("jj:subs",cloud.subs||[]);
-      setOrdersS(cloud.orders||[]);LS.s("jj:orders",cloud.orders||[]);
+      setItemsS(Array.isArray(cloud.items)?cloud.items:[]);LS.s("jj:items",Array.isArray(cloud.items)?cloud.items:[]);
     } else {
-      const lc={...DCFG,...(LS.g("jj:cfg")||{})};
-      // Also repair an old browser-saved placeholder URL.
-      if(!lc.ordersScriptUrl||String(lc.ordersScriptUrl).includes("PASTE_YOUR_GOOGLE")){
-        lc.ordersScriptUrl=DCFG.ordersScriptUrl;
-      }
+      const lc={...DCFG,...localCfg};
+      if(!lc.ordersScriptUrl||String(lc.ordersScriptUrl).includes("PASTE_YOUR_GOOGLE")) lc.ordersScriptUrl=DCFG.ordersScriptUrl;
       buildT(lc);setCfgS(lc);LS.s("jj:cfg",lc);
       setItemsS(LS.g("jj:items")||[]);
-      setSubsS(LS.g("jj:subs")||[]);
-      setOrdersS(LS.g("jj:orders")||[]);
     }
+    setSubsS([]);setOrdersS([]);
     setLoading(false);
     if(cfg.currencyAuto){
       try{const r=await fetch("https://ipapi.co/json/");const d=await r.json();
@@ -217,14 +209,14 @@ function App(){
 
   // Welcome/signup popup disabled by request.
 
-  const syncCloud=async(ni,ns,no,nc)=>{
-    const c=nc||cfg;if(!c.jbKey||!c.jbId)return;
-    await JB.push(c.jbKey,c.jbId,{items:ni||items,subs:ns||subs,orders:no||orders,cfg:c});
+  const syncCloud=async(ni,nc)=>{
+    const c=nc||cfg;if(!c.cloudSyncUrl||!c.cloudSyncToken)return false;
+    const safeCfg={...c};delete safeCfg.cloudSyncToken;return await CloudStore.push(c.cloudSyncUrl,c.cloudSyncToken,{items:ni||items,cfg:safeCfg});
   };
-  const saveItems=async v=>{setItemsS(v);LS.s("jj:items",v);await syncCloud(v,null,null,null);};
-  const saveSubs=async v=>{setSubsS(v);LS.s("jj:subs",v);await syncCloud(null,v,null,null);};
-  const saveOrders=async v=>{setOrdersS(v);LS.s("jj:orders",v);await syncCloud(null,null,v,null);};
-  const saveCfg=async v=>{buildT(v);setCfgS(v);LS.s("jj:cfg",v);await syncCloud(null,null,null,v);};
+  const saveItems=async v=>{setItemsS(v);LS.s("jj:items",v);const ok=await syncCloud(v,null);if(!ok)toast("Saved on this device only. Check Cloud Sync settings.");};
+  const saveSubs=async v=>{setSubsS(v);LS.s("jj:subs",v);};
+  const saveOrders=async v=>{setOrdersS(v);LS.s("jj:orders",v);};
+  const saveCfg=async v=>{buildT(v);setCfgS(v);LS.s("jj:cfg",v);const ok=await syncCloud(null,v);if(v.cloudSyncUrl&&v.cloudSyncToken&&!ok)toast("Settings saved here, but cloud sync failed.");};
   const toast=m=>{setNotif(m);setTimeout(()=>setNotif(null),3000)};
 
   buildT(cfg);
@@ -729,10 +721,10 @@ function ItemPage({item,items,cfg,onBack,onAdd,onItem,currency}){
       <div className="item-page-grid" style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(280px,1fr))",gap:44,marginBottom:44}}>
         {/* Left: media */}
         <div>
-          <div style={{borderRadius:22,overflow:"hidden",background:T.p+"12",boxShadow:T.sh2}}>
+          <div style={{position:"relative",minHeight:220,borderRadius:22,overflow:"hidden",background:T.p+"12",boxShadow:T.sh2}}>
             {mediaList[si]
               ?<img src={mediaList[si]} alt={item.name} onError={e=>e.target.style.display="none"} style={{display:"block",width:"100%",height:"auto",objectFit:"contain"}}/>
-              :<div style={{position:"absolute",inset:0,display:"flex",alignItems:"center",justifyContent:"center",fontSize:64,color:T.p+"66"}}>✦</div>
+              :<div style={{position:"absolute",inset:0,display:"flex",alignItems:"center",justifyContent:"center",fontSize:64,color:T.p+"66",pointerEvents:"none"}}>✦</div>
             }
           </div>
           {mediaList.length>1&&(
@@ -1416,11 +1408,12 @@ function AdminPage({ok,onAuth,cfg,saveCfg,items,saveItems,subs,saveSubs,orders,o
           <SBox title="🔐 Security">
             <div><Lbl c="Admin Password"/><input type="password" value={ec.adminPass||""} onChange={e=>se("adminPass",e.target.value)} style={iSt()}/></div>
           </SBox>
-          <SBox title="☁️ Cloud Sync (JSONBin)">
+          <SBox title="☁️ Cloud Sync (Google Apps Script)">
+            <p style={{fontSize:12,lineHeight:1.6,color:T.tm}}>Paste the deployed Cloud Sync web app URL and the same secret you saved in Apps Script Properties. Do not use your order-submission URL here.</p>
             <div style={{display:"flex",flexDirection:"column",gap:9}}>
-              <div><Lbl c="Master Key"/><input type="password" value={ec.jbKey||""} onChange={e=>se("jbKey",e.target.value)} style={iSt()}/></div>
-              <div><Lbl c="Bin ID"/><input value={ec.jbId||""} onChange={e=>se("jbId",e.target.value)} style={iSt()}/></div>
-              <button onClick={async()=>{setTestStatus("Testing…");const r=await JB.pull(ec.jbKey,ec.jbId);setTestStatus(r!==null?"✅ Connected!":"❌ Failed. Check credentials.");}} className="btn" style={{alignSelf:"flex-start",background:T.bg,border:"1.5px solid "+T.b,borderRadius:50,padding:"8px 18px",fontSize:13,color:T.text}}>Test Connection</button>
+              <div><Lbl c="Cloud Sync Web App URL"/><input value={ec.cloudSyncUrl||""} onChange={e=>se("cloudSyncUrl",e.target.value)} placeholder="https://script.google.com/macros/s/.../exec" style={iSt()}/></div>
+              <div><Lbl c="Cloud Sync Secret"/><input type="password" value={ec.cloudSyncToken||""} onChange={e=>se("cloudSyncToken",e.target.value)} placeholder="Same value as CLOUD_SYNC_TOKEN" style={iSt()}/></div>
+              <button onClick={async()=>{setTestStatus("Testing…");const r=await CloudStore.pull(ec.cloudSyncUrl);setTestStatus(r!==null?"✅ Connected":"❌ Could not read cloud data. Check deployment URL/access.");}} className="btn" style={{alignSelf:"flex-start",background:T.bg,border:"1.5px solid "+T.b,borderRadius:50,padding:"8px 18px",fontSize:13,color:T.text}}>Test Connection</button>
               {testStatus&&<p style={{fontSize:13,color:testStatus.includes("✅")?T.p:"#E54040"}}>{testStatus}</p>}
             </div>
           </SBox>
